@@ -37,9 +37,10 @@ require_once('../Models/conexion.php');
 
                     <div class="col-md-10">
                         <div class="widget-small">
-                            <select name="diax" id="diax" class="form-control">
+                            <select name="valor" id="valor" class="form-control">
                                 <option value="">Seleccione una opción.........</option>
                                 <option value="Diax">Diax</option>
+                                <option value="PAZ">PAZ</option>
                             </select>
                         </div>
                     </div>

@@ -48,7 +48,7 @@ ob_start();
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="http://<?php echo $_SERVER['HTTP_HOST']; ?>/sistema_diax/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="http://<?php echo $_SERVER['HTTP_HOST']; ?>/sistemadiax/bootstrap/dist/css/bootstrap.min.css">
   <title>Reporte de Comprobantes</title>
 </head>
 
@@ -60,73 +60,65 @@ ob_start();
         <div class="tile">
           <h5 class="text-center">Lista de Pacientes Diax</h5>
           <div class="table-responsive">
-            <table id="tabla_Usuario" class="table table-striped table-bordered table-condensed " style=" font-size: 10px;">
+          <table class="table table-striped project-orders-table text-center">
               <thead>
-                <tr class="text-center">
-
-                <th>Fecha</th>
-                <th>Nombre</th>
-                <th>Cedula</th>
-                <th>Estudio</th>
-                <th>Doctor/a</th>
-                <th>Seguro</th>
-                <th>Monto</th>
-                <th>Descuento</th>
-                <th>Comentario</th>
-
+                <tr>
+                  <th class="ml-5">Nro</th>
+                  <th>Ruc </th>
+                  <th>Razon Social</th>
+                  <th>Estudio</th>
+                  <th>Monto</th>
+                  <th>Descuento</th>
+                  <th>Doctor</th>
+                  <th>Forma de Pago</th>
+                  <th>Seguro</th>
+                  <th>Comentario</th>
+                  <th>Fecha</th>
+                  
                 </tr>
               </thead>
-
               <tbody>
                 <?php
-                $anio = date_create($_REQUEST['fecha_desde']);
-                $hoy = date_format($anio, 'm-Y');
+                // $fecha1 = "05-01-2023";
+                $fecha =  date('Y-m-d');
+                //  echo $fecha1." ".$fecha2;
+                //  exit;
+                $sql = mysqli_query($conection, "SELECT  c.id,c.ruc, c.razon_social,dc.descripcion as estudio, SUM(dc.monto) as monto,dc.descuento, m.nombre as doctor, fp.descripcion as forma_pago,s.descripcion as seguro,c.comentario, c.created_at
+                FROM comprobantes c INNER JOIN detalle_comprobantes dc ON c.id = dc.comprobante_id
+                INNER JOIN medicos m ON m.id = c.doctor_id INNER JOIN forma_pagos fp ON fp.id = dc.forma_pago_id
+                INNER JOIN seguros s ON s.id = dc.seguro_id
+                WHERE m.nombre like '%DIAX%' AND c.created_at LIKE '%". $fecha."%' AND c.estatus = 1 GROUP BY c.id  ORDER BY  c.id ASC");
 
-                $sql = mysqli_query($conection, "SELECT DISTINCT(h.id),c.nombre,c.apellido,h.Estudio,h.Cedula,h.Atendedor,h.Fecha,h.Seguro,h.Monto,h.Descuento,h.MontoS,h.Comentario, h.fecha_2 
-                FROM historial h inner join clientes c on c.cedula = h.cedula  where $where and Fecha like '%".$hoy."%' and atendedor like '%".$diax."%' ORDER BY  h.id ASC");
-              
-              
                 $resultado = mysqli_num_rows($sql);
-                $monto = 0;
-
+                $diax = 0;
+                $descuento = 0;
+                $nro = 0;
+                $total = 0;
                 if ($resultado > 0) {
                   while ($data = mysqli_fetch_array($sql)) {
-                    $monto += (int)$data['Monto'];
-
+                    $diax += (int)$data['monto'];
+                    $descuento += (int)$data['descuento'];
+                    $total = $diax - $descuento;
+                    $nro++;
                 ?>
                     <tr class="text-center">
-                    <td><?php echo $data['Fecha'] ?></td>
-                    <td><?php echo $data['nombre'].' '.$data['apellido'];  ?></td>
-                    <td><?php echo $data['Cedula']; ?></td>
-                    <td><?php echo $data['Estudio']; ?></td>
-                    <td><?php echo $data['Atendedor']; ?></td>
-                    <td><?php echo $data['Seguro']; ?></td>
-                    <td><?php echo $data['Monto'] ?></td>
-                    <td><?php echo $data['Descuento'] ?></td>
-                    <td><?php echo $data['Comentario'] ?></td>
 
+                      <td><?php echo $nro ?></td>
+                      <td><?php echo $data['ruc']; ?></td>
+                      <td><?php echo $data['razon_social']; ?></td>
+                      <td><?php echo $data['estudio']; ?></td>
+                      <td><?php echo number_format($data['monto'],0, '.', '.'); ?></td>
+                      <td><?php echo number_format($data['descuento'],0, '.', '.'); ?></td>
+                      <td><?php echo $data['doctor'] ?></td>
+                      <td><?php echo $data['forma_pago'] ?></td>
+                      <td><?php echo $data['seguro'] ?></td>
+                      <td><?php echo $data['comentario'] ?></td>
+                      <td><?php echo $data['created_at'] ?></td>
 
                     </tr>
-
-
                 <?php }
                 } ?>
               </tbody>
-              <tr>
-                <td><b>Total A Rendir : </b></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td class="alert alert-success text-center">
-                <?php echo number_format($monto, 3, '.', '.'); ?>.<b>G</b>
-                </td>
-
-
-              </tr>
             </table>
           </div>
         </div>
